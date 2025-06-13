@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSM Crossword Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>LSM Crossword Puzzle</h1>
+        
+        <div class="alphabet-signs">
+            <!-- Alphabet signs will be populated by JavaScript -->
+        </div>
+        
+        <div class="game-area">
+            <div class="clues-container">
+                <div class="across-clues">
+                    <h3>Horizontal (Across)</h3>
+                    <ul id="across-clues"></ul>
+                </div>
+                <div class="down-clues">
+                    <h3>Vertical (Down)</h3>
+                    <ul id="down-clues"></ul>
+                </div>
+            </div>
+            
+            <div id="crossword-grid"></div>
+            
+            <div id="video-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <video id="clue-video" controls>
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

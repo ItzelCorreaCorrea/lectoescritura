@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo a Pronunciar</title>
+    <style>
+        /* CSS */
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .word-display {
+            font-size: 4rem;
+            margin: 20px 0;
+            color: #4d96ff;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .letter {
+            display: inline-block;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+
+        .highlight {
+            color: #ff6b6b;
+            transform: scale(1.3);
+            font-weight: bold;
+        }
+
+        .highlight-all {
+            color: #6bff6b;
+            transform: scale(1.2);
+            font-weight: bold;
+        }
+
+        .image-container {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #4d96ff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .word-display {
+                font-size: 3rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        footer {
+            background-color: #4d96ff;
+            color: white;
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- HTML -->
+    <div class="container">
+        <h1>Aprendiendo a Pronunciar</h1>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="word-display" id="wordDisplay"></div>
+        
+        <div class="image-container">
+            <img id="wordImage" src="" alt="Imagen de la palabra">
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Anterior</button>
+            <button id="playBtn">Reproducir</button>
+            <button id="nextBtn">Siguiente</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos de palabras con sus imágenes (ahora con 10 palabras)
+            const wordsData = [
+                {
+                    word: "GATO",
+                    image: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_640.jpg",
+                    letters: ["G", "A", "T", "O"]
+                },
+                {
+                    word: "CASA",
+                    image: "https://cdn.pixabay.com/photo/2016/06/24/10/47/house-1477041_640.jpg",
+                    letters: ["C", "A", "S", "A"]
+                },
+                {
+                    word: "SOL",
+                    image: "https://cdn.pixabay.com/photo/2017/07/18/18/24/drop-2516649_640.jpg",
+                    letters: ["S", "O", "L"]
+                },
+                {
+                    word: "LUNA",
+                    image: "https://cdn.pixabay.com/photo/2016/11/21/14/57/moon-1846096_640.jpg",
+                    letters: ["L", "U", "N", "A"]
+                },
+                {
+                    word: "ÁRBOL",
+                    image: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_640.jpg",
+                    letters: ["Á", "R", "B", "O", "L"]
+                },
+                // Nuevas palabras agregadas
+                {
+                    word: "PERRO",
+                    image: "https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg",
+                    letters: ["P", "E", "R", "R", "O"]
+                },
+                {
+                    word: "FLOR",
+                    image: "https://cdn.pixabay.com/photo/2018/01/29/07/11/flower-3115353_640.jpg",
+                    letters: ["F", "L", "O", "R"]
+                },
+                {
+                    word: "MESA",
+                    image: "https://cdn.pixabay.com/photo/2017/07/18/18/24/drop-2516649_640.jpg",
+                    letters: ["M", "E", "S", "A"]
+                },
+                {
+                    word: "PATO",
+                    image: "https://cdn.pixabay.com/photo/2017/02/28/14/37/duck-2105668_640.jpg",
+                    letters: ["P", "A", "T", "O"]
+                },
+                {
+                    word: "NUBE",
+                    image: "https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569_640.jpg",
+                    letters: ["N", "U", "B", "E"]
+                }
+            ];
+
+            // Elementos del DOM
+            const wordDisplay = document.getElementById('wordDisplay');
+            const wordImage = document.getElementById('wordImage');
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressBar = document.getElementById('progressBar');
+
+            // Variables de estado
+            let currentWordIndex = 0;
+            let isPlaying = false;
+            let currentLetterIndex = 0;
+            let speechSynthesis = window.speechSynthesis;
+
+            // Cargar la palabra actual
+            function loadWord(index) {
+                if (index < 0 || index >= wordsData.length) return;
+                
+                currentWordIndex = index;
+                const currentWord = wordsData[currentWordIndex];
+                
+                // Mostrar la palabra completa
+                wordDisplay.innerHTML = '';
+                currentWord.letters.forEach((letter, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'letter';
+                    span.textContent = letter;
+                    span.id = `letter-${i}`;
+                    wordDisplay.appendChild(span);
+                });
+                
+                // Cargar la imagen
+                wordImage.src = currentWord.image;
+                wordImage.alt = `Imagen de ${currentWord.word}`;
+                
+                // Actualizar progreso
+                progressBar.style.width = `${(currentWordIndex + 1) / wordsData.length * 100}%`;
+                
+                // Actualizar estado de los botones
+                prevBtn.disabled = currentWordIndex === 0;
+                nextBtn.disabled = currentWordIndex === wordsData.length - 1;
+                
+                // Reiniciar el estado de reproducción
+                isPlaying = false;
+                currentLetterIndex = 0;
+                playBtn.textContent = 'Reproducir';
+                
+                // Quitar resaltado de todas las letras
+                document.querySelectorAll('.letter').forEach(letter => {
+                    letter.classList.remove('highlight', 'highlight-all');
+                });
+            }
+
+            // Pronunciar la palabra letra por letra
+            async function playWord() {
+                if (isPlaying) return;
+                
+                isPlaying = true;
+                playBtn.disabled = true;
+                playBtn.textContent = 'Reproduciendo...';
+                const currentWord = wordsData[currentWordIndex];
+                
+                // Pronunciar cada letra
+                for (let i = 0; i < currentWord.letters.length; i++) {
+                    currentLetterIndex = i;
+                    
+                    // Resaltar la letra actual
+                    document.querySelectorAll('.letter').forEach(letter => {
+                        letter.classList.remove('highlight', 'highlight-all');
+                    });
+                    document.getElementById(`letter-${i}`).classList.add('highlight');
+                    
+                    // Pronunciar la letra
+                    await speakLetter(currentWord.letters[i]);
+                    await new Promise(resolve => setTimeout(resolve, 800)); // Pausa entre letras
+                }
+                
+                // Resaltar todas las letras al pronunciar la palabra completa
+                document.querySelectorAll('.letter').forEach(letter => {
+                    letter.classList.add('highlight-all');
+                });
+                
+                // Pronunciar la palabra completa
+                await speakWord(currentWord.word);
+                
+                // Quitar resaltado después de un breve tiempo
+                setTimeout(() => {
+                    document.querySelectorAll('.letter').forEach(letter => {
+                        letter.classList.remove('highlight', 'highlight-all');
+                    });
+                }, 1000);
+                
+                // Restablecer estado
+                isPlaying = false;
+                playBtn.disabled = false;
+                playBtn.textContent = 'Reproducir';
+            }
+
+            // Función para pronunciar una letra
+            function speakLetter(letter) {
+                return new Promise(resolve => {
+                    const utterance = new SpeechSynthesisUtterance(letter);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 0.8;
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                });
+            }
+
+            // Función para pronunciar una palabra
+            function speakWord(word) {
+                return new Promise(resolve => {
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 0.8;
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                });
+            }
+
+            // Event listeners
+            playBtn.addEventListener('click', function() {
+                if (!isPlaying) {
+                    playWord();
+                }
+            });
+
+            prevBtn.addEventListener('click', function() {
+                if (currentWordIndex > 0) {
+                    loadWord(currentWordIndex - 1);
+                }
+            });
+
+            nextBtn.addEventListener('click', function() {
+                if (currentWordIndex < wordsData.length - 1) {
+                    loadWord(currentWordIndex + 1);
+                }
+            });
+
+            // Inicializar con la primera palabra
+            loadWord(0);
+        });
+    </script>
+</body>
+</html>

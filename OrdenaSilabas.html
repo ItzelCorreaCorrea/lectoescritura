@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formando Palabras con Sílabas</title>
+    <style>
+        /* Estilos consistentes con las otras actividades */
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f0f9ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .level-selector {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-btn:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+        }
+
+        .level-btn.active {
+            background-color: #6bff6b;
+        }
+
+        .game-area {
+            margin: 30px 0;
+        }
+
+        .syllables-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            min-height: 60px;
+        }
+
+        .syllable {
+            background-color: #f0f8ff;
+            border: 2px solid #4d96ff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 1.5rem;
+            cursor: grab;
+            transition: all 0.3s;
+            user-select: none;
+            touch-action: none; /* Importante para el drag en móviles */
+        }
+
+        .syllable:hover {
+            background-color: #d1e3ff;
+        }
+
+        .syllable.dragging {
+            opacity: 0.5;
+            transform: scale(1.1);
+            cursor: grabbing;
+        }
+
+        .word-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 30px 0;
+            min-height: 60px;
+            flex-wrap: wrap;
+        }
+
+        .word-slot {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #4d96ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .word-slot.highlight {
+            background-color: #f0f8ff;
+        }
+
+        .word-slot.filled {
+            border: 2px solid #4d96ff;
+            background-color: #d1e3ff;
+        }
+
+        .image-container {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .image-container.show {
+            opacity: 1;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            min-height: 30px;
+        }
+
+        .correct {
+            color: #6bff6b;
+        }
+
+        .incorrect {
+            color: #ff6b6b;
+        }
+        header {
+            display: flex;
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .syllable {
+                font-size: 1.2rem;
+                padding: 8px 12px;
+            }
+            
+            .word-slot {
+                width: 50px;
+                height: 50px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        .btn {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            position: relative;
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="location.href='index.html'">
+                <div class="logo-text">Aprendiendo con Diversión</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="actividades.html">Actividades</a></li>
+                    <li><a href="recursos.html">Recursos</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Formando Palabras con Sílabas</h1>
+        
+        <div class="level-selector" id="levelSelector">
+            <!-- Los niveles se cargarán dinámicamente desde la base de datos -->
+        </div>
+        
+        <div class="game-area">
+            <div class="syllables-container" id="syllablesContainer">
+                <!-- Las sílabas se cargarán dinámicamente -->
+            </div>
+            
+            <div class="word-container" id="wordContainer">
+                <!-- Los espacios para la palabra se generarán dinámicamente -->
+            </div>
+            
+            <div class="image-container" id="imageContainer">
+                <img id="wordImage" src="" alt="Imagen de la palabra">
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="checkBtn">Comprobar</button>
+            <button id="nextBtn">Siguiente</button>
+            <button id="hearBtn">Escuchar</button>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 Aprendiendo con Diversión | UMSNH</p>
+        <div class="footer-links">
+            <a href="privacidad.html">Política de Privacidad</a>
+            <a href="terminos.html">Términos de Uso</a>
+            <a href="contacto.html">Contacto</a>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de carga suave
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        const logo = document.querySelector('.logo');
+            if(logo) {
+                logo.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                logo.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const levelSelector = document.getElementById('levelSelector');
+            const syllablesContainer = document.getElementById('syllablesContainer');
+            const wordContainer = document.getElementById('wordContainer');
+            const imageContainer = document.getElementById('imageContainer');
+            const wordImage = document.getElementById('wordImage');
+            const feedback = document.getElementById('feedback');
+            const checkBtn = document.getElementById('checkBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const hearBtn = document.getElementById('hearBtn');
+            
+            // Variables de estado
+            let currentLevel = 1;
+            let currentWord = null;
+            let syllables = [];
+            let selectedSyllables = [];
+            let wordSlots = [];
+            let draggedSyllable = null;
+            let draggedSyllableOrigin = null;
+            
+            // Simulación de datos de la base de datos (en un caso real, estos datos vendrían de un backend)
+            const wordsDatabase = [
+                { id_palabra: 1, categoria_id: 1, palabra: 'gato', silabas: 'ga-to', nivel_id: 1 },
+                { id_palabra: 2, categoria_id: 1, palabra: 'casa', silabas: 'ca-sa', nivel_id: 1 },
+                { id_palabra: 3, categoria_id: 1, palabra: 'perro', silabas: 'pe-rro', nivel_id: 1 },
+                { id_palabra: 4, categoria_id: 1, palabra: 'sol', silabas: 'sol', nivel_id: 1 },
+                { id_palabra: 5, categoria_id: 1, palabra: 'mesa', silabas: 'me-sa', nivel_id: 1 },
+                { id_palabra: 6, categoria_id: 1, palabra: 'joyero', silabas: 'jo-ye-ro', nivel_id: 2 },
+                { id_palabra: 7, categoria_id: 1, palabra: 'ajolote', silabas: 'a-jo-lo-te', nivel_id: 2 },
+                { id_palabra: 8, categoria_id: 1, palabra: 'armadillo', silabas: 'ar-ma-di-llo', nivel_id: 3 },
+                { id_palabra: 9, categoria_id: 1, palabra: 'salamandra', silabas: 'sa-la-man-dra', nivel_id: 3 },
+                { id_palabra: 10, categoria_id: 1, palabra: 'mariposa', silabas: 'ma-ri-po-sa', nivel_id: 3 },
+                { id_palabra: 11, categoria_id: 1, palabra: 'cocodrilo', silabas: 'co-co-dri-lo', nivel_id: 3 },
+                { id_palabra: 12, categoria_id: 1, palabra: 'carpintero', silabas: 'car-pin-te-ro', nivel_id: 3 },
+                { id_palabra: 13, categoria_id: 1, palabra: 'conejo', silabas: 'co-ne-jo', nivel_id: 2 },
+                { id_palabra: 14, categoria_id: 1, palabra: 'tortuga', silabas: 'tor-tu-ga', nivel_id: 2 },
+                { id_palabra: 15, categoria_id: 1, palabra: 'rinoceronte', silabas: 'ri-no-ce-ron-te', nivel_id: 3 },
+                { id_palabra: 16, categoria_id: 1, palabra: 'lobo', silabas: 'lo-bo', nivel_id: 1 },
+                { id_palabra: 17, categoria_id: 1, palabra: 'pez', silabas: 'pez', nivel_id: 1 },
+                { id_palabra: 18, categoria_id: 1, palabra: 'ballena', silabas: 'ba-lle-na', nivel_id: 2 },
+                { id_palabra: 19, categoria_id: 1, palabra: 'chofer', silabas: 'cho-fer', nivel_id: 1 },
+                { id_palabra: 20, categoria_id: 1, palabra: 'guía', silabas: 'guí-a', nivel_id: 1 },
+                { id_palabra: 21, categoria_id: 1, palabra: 'cajero', silabas: 'ca-je-ro', nivel_id: 2 },
+                { id_palabra: 22, categoria_id: 1, palabra: 'águila', silabas: 'á-gui-la', nivel_id: 2 },
+                { id_palabra: 23, categoria_id: 1, palabra: 'relojero', silabas: 're-lo-je-ro', nivel_id: 3 },
+                { id_palabra: 24, categoria_id: 1, palabra: 'armadillo', silabas: 'ar-ma-di-llo', nivel_id: 3 }
+            ];
+            
+            // Niveles disponibles
+            const levels = [1, 2, 3];
+            
+            // Inicializar la aplicación
+            function init() {
+                loadLevels();
+                loadWord();
+                setupEventListeners();
+            }
+            
+            // Cargar los niveles desde la base de datos
+            function loadLevels() {
+                levelSelector.innerHTML = '';
+                
+                levels.forEach(level => {
+                    const button = document.createElement('button');
+                    button.className = `level-btn ${level === currentLevel ? 'active' : ''}`;
+                    button.textContent = `Nivel ${level}`;
+                    button.addEventListener('click', () => {
+                        currentLevel = level;
+                        document.querySelectorAll('.level-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        button.classList.add('active');
+                        loadWord();
+                    });
+                    levelSelector.appendChild(button);
+                });
+            }
+            
+            // Cargar una palabra aleatoria del nivel actual
+            function loadWord() {
+                // Filtrar palabras por nivel
+                const levelWords = wordsDatabase.filter(word => word.nivel_id === currentLevel);
+                
+                if (levelWords.length === 0) {
+                    feedback.textContent = 'No hay palabras disponibles para este nivel.';
+                    return;
+                }
+                
+                // Seleccionar una palabra aleatoria
+                currentWord = levelWords[Math.floor(Math.random() * levelWords.length)];
+                
+                // Separar las sílabas
+                syllables = currentWord.silabas.split('-');
+                selectedSyllables = [];
+                
+                // Mostrar las sílabas desordenadas
+                displaySyllables();
+                
+                // Preparar los espacios para la palabra
+                prepareWordSlots();
+                
+                // Ocultar la imagen y limpiar feedback
+                imageContainer.classList.remove('show');
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+                
+                // Deshabilitar botones según corresponda
+                checkBtn.disabled = false;
+                nextBtn.disabled = true;
+            }
+            
+            // Mostrar las sílabas desordenadas
+            function displaySyllables() {
+                syllablesContainer.innerHTML = '';
+                
+                // Crear una copia desordenada de las sílabas
+                const shuffledSyllables = [...syllables].sort(() => Math.random() - 0.5);
+                
+                shuffledSyllables.forEach((syllable, index) => {
+                    const syllableElement = document.createElement('div');
+                    syllableElement.className = 'syllable';
+                    syllableElement.textContent = syllable;
+                    syllableElement.dataset.syllable = syllable;
+                    syllableElement.draggable = true;
+                    
+                    // Añadir eventos de drag
+                    syllableElement.addEventListener('dragstart', handleDragStart);
+                    syllableElement.addEventListener('dragend', handleDragEnd);
+                    
+                    syllablesContainer.appendChild(syllableElement);
+                });
+            }
+            
+            // Preparar los espacios para formar la palabra
+            function prepareWordSlots() {
+                wordContainer.innerHTML = '';
+                wordSlots = [];
+                
+                for (let i = 0; i < syllables.length; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'word-slot';
+                    slot.dataset.index = i;
+                    
+                    // Añadir eventos de drop
+                    slot.addEventListener('dragover', handleDragOver);
+                    slot.addEventListener('dragenter', handleDragEnter);
+                    slot.addEventListener('dragleave', handleDragLeave);
+                    slot.addEventListener('drop', handleDrop);
+                    slot.addEventListener('click', handleSlotClick);
+                    
+                    wordContainer.appendChild(slot);
+                    wordSlots.push(slot);
+                }
+            }
+            
+            // Manejar el inicio del arrastre
+            function handleDragStart(e) {
+                draggedSyllable = this;
+                draggedSyllableOrigin = this.parentElement;
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.textContent);
+                e.dataTransfer.effectAllowed = 'move';
+                
+                // Resaltar los slots vacíos
+                wordSlots.forEach(slot => {
+                    if (!slot.textContent) {
+                        slot.classList.add('highlight');
+                    }
+                });
+            }
+            
+            // Manejar el final del arrastre
+            function handleDragEnd() {
+                this.classList.remove('dragging');
+                
+                // Quitar el resaltado de los slots
+                wordSlots.forEach(slot => {
+                    slot.classList.remove('highlight');
+                });
+            }
+            
+            // Permitir soltar en los slots
+            function handleDragOver(e) {
+                if (!this.textContent) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                }
+            }
+            
+            // Resaltar el slot al entrar
+            function handleDragEnter(e) {
+                if (!this.textContent) {
+                    e.preventDefault();
+                    this.classList.add('highlight');
+                }
+            }
+            
+            // Quitar resaltado al salir
+            function handleDragLeave() {
+                this.classList.remove('highlight');
+            }
+            
+            // Manejar el drop en un slot
+            function handleDrop(e) {
+                e.preventDefault();
+                this.classList.remove('highlight');
+                
+                if (this.textContent) return; // Si ya tiene una sílaba, no hacer nada
+                
+                const syllable = e.dataTransfer.getData('text/plain');
+                
+                // Colocar la sílaba en el slot
+                this.textContent = syllable;
+                this.dataset.syllable = syllable;
+                this.classList.add('filled');
+                
+                // Marcar la sílaba como usada
+                draggedSyllable.style.visibility = 'hidden';
+                
+                // Actualizar las sílabas seleccionadas
+                updateSelectedSyllables();
+            }
+            
+            // Manejar clic en un slot para devolver la sílaba
+            function handleSlotClick() {
+                if (!this.textContent) return;
+                
+                const syllable = this.textContent;
+                
+                // Devolver la sílaba al contenedor original
+                const syllableElements = document.querySelectorAll('.syllable');
+                for (let el of syllableElements) {
+                    if (el.textContent === syllable && el.style.visibility === 'hidden') {
+                        el.style.visibility = 'visible';
+                        break;
+                    }
+                }
+                
+                // Limpiar el slot
+                this.textContent = '';
+                this.classList.remove('filled');
+                delete this.dataset.syllable;
+                
+                // Actualizar las sílabas seleccionadas
+                updateSelectedSyllables();
+            }
+            
+            // Actualizar el array de sílabas seleccionadas
+            function updateSelectedSyllables() {
+                selectedSyllables = [];
+                const slots = document.querySelectorAll('.word-slot');
+                
+                slots.forEach(slot => {
+                    if (slot.textContent) {
+                        selectedSyllables.push(slot.textContent);
+                    }
+                });
+            }
+            
+            // Comprobar si la palabra formada es correcta
+            function checkWord() {
+                const formedWord = selectedSyllables.join('');
+                const correctWord = currentWord.palabra.replace(/-/g, '');
+                
+                if (formedWord.toLowerCase() === correctWord.toLowerCase()) {
+                    feedback.textContent = '¡Correcto! ¡Buen trabajo!';
+                    feedback.className = 'feedback correct';
+                    
+                    // Mostrar la imagen
+                    wordImage.src = `img/${currentWord.palabra}.jpg`;
+                    wordImage.alt = `Imagen de ${currentWord.palabra}`;
+                    imageContainer.classList.add('show');
+                    
+                    // Habilitar el botón de siguiente
+                    nextBtn.disabled = false;
+                } else {
+                    feedback.textContent = 'Inténtalo de nuevo. ¡Tú puedes!';
+                    feedback.className = 'feedback incorrect';
+                }
+            }
+            
+            // Reproducir el audio de la palabra
+            function playWordAudio() {
+                if (!currentWord) return;
+                
+                // En un entorno real, esto usaría la Web Speech API o archivos de audio pregrabados
+                const utterance = new SpeechSynthesisUtterance(currentWord.palabra);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+            
+            // Configurar event listeners
+            function setupEventListeners() {
+                checkBtn.addEventListener('click', checkWord);
+                nextBtn.addEventListener('click', loadWord);
+                hearBtn.addEventListener('click', playWordAudio);
+            }
+            
+            // Iniciar la aplicación
+            init();
+        });
+    </script>
+</body>
+</html>

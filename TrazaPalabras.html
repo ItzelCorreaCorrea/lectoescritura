@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo a Trazar Letras</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0f9ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .letter-selector {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .letter-option {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .letter-option:hover {
+            background-color: #d1e3ff;
+        }
+
+        .letter-option.active {
+            background-color: #4d96ff;
+            color: white;
+        }
+
+        .case-toggle {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .case-toggle button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .case-toggle button.active {
+            background-color: #6bff6b;
+        }
+
+        /* Área de trazado */
+        .tracing-area {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 20px auto;
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            touch-action: none;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #guideCanvas {
+            z-index: 1;
+        }
+
+        #drawingCanvas {
+            z-index: 2;
+        }
+
+        /* Indicadores */
+        .instructions {
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .progress {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .letter-option {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+            }
+            
+            .tracing-area {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aprendiendo a Trazar Letras</h1>
+        
+        <div class="controls">
+            <button id="prevBtn">Anterior</button>
+            <button id="nextBtn">Siguiente</button>
+            <button id="clearBtn">Limpiar</button>
+        </div>
+        
+        <div class="case-toggle">
+            <button id="uppercaseBtn" class="active">MAYÚSCULAS</button>
+            <button id="lowercaseBtn">minúsculas</button>
+        </div>
+        
+        <div class="letter-selector" id="letterSelector"></div>
+        
+        <div class="instructions">
+            Sigue los puntos con tu dedo o cursor para trazar la letra
+        </div>
+        
+        <div class="tracing-area">
+            <canvas id="guideCanvas"></canvas>
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+        
+        <div class="progress">
+            <span id="currentLetterDisplay">A</span> / <span id="totalLetters">26</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración de letras
+            const letters = {
+                uppercase: [
+                    { char: 'A', points: [30,150,80,50,130,150], strokes: [[60,100,110,100]] },
+                    { char: 'B', points: [50,50,50,150,100,50,100,150], strokes: [] },
+                    { char: 'C', points: [150,50,50,50,50,150,150,150], strokes: [] },
+                    { char: 'D', points: [50,50,50,150,100,150,150,100,150,50,100,50], strokes: [] },
+                    { char: 'E', points: [150,50,50,50,50,150,150,150], strokes: [[50,100,100,100]] },
+                    { char: 'F', points: [150,50,50,50,50,150], strokes: [[50,100,100,100]] },
+                    { char: 'G', points: [150,50,50,50,50,150,150,150,150,100,100,100], strokes: [] },
+                    { char: 'H', points: [50,50,50,150,150,50,150,150], strokes: [[50,100,150,100]] },
+                    { char: 'I', points: [100,50,100,150], strokes: [[80,50,120,50], [80,150,120,150]] },
+                    { char: 'J', points: [150,50,150,150,100,150,50,150], strokes: [[80,50,120,50]] },
+                    { char: 'K', points: [50,50,50,150,150,50,50,100,150,150], strokes: [] },
+                    { char: 'L', points: [50,50,50,150,150,150], strokes: [] },
+                    { char: 'M', points: [50,150,50,50,100,100,150,50,150,150], strokes: [] },
+                    { char: 'N', points: [50,150,50,50,150,150,150,50], strokes: [] },
+                    { char: 'Ñ', points: [50,150,50,50,150,150,150,50], strokes: [[80,30,100,30]] },
+                    { char: 'O', points: [50,50,150,50,150,150,50,150,50,50], strokes: [] },
+                    { char: 'P', points: [50,50,50,150,100,150,150,100,150,50,100,50], strokes: [] },
+                    { char: 'Q', points: [50,50,150,50,150,150,50,150,50,50], strokes: [[100,100,150,150]] },
+                    { char: 'R', points: [50,50,50,150,100,150,150,100,150,50,100,50], strokes: [[100,100,150,150]] },
+                    { char: 'S', points: [150,50,50,50,50,100,150,100,150,150,50,150], strokes: [] },
+                    { char: 'T', points: [30,50,130,50], strokes: [[80,50,80,150]] },
+                    { char: 'U', points: [50,50,50,150,150,150,150,50], strokes: [] },
+                    { char: 'V', points: [50,50,100,150,150,50], strokes: [] },
+                    { char: 'W', points: [50,50,75,150,100,50,125,150,150,50], strokes: [] },
+                    { char: 'X', points: [50,50,150,150], strokes: [[150,50,50,150]] },
+                    { char: 'Y', points: [50,50,100,100,150,50], strokes: [[100,100,100,150]] },
+                    { char: 'Z', points: [50,50,150,50,50,150,150,150], strokes: [] }
+                ],
+                lowercase: [
+                    { char: 'a', points: [100,100,150,100,150,150,100,150,50,150,50,100,100,100], strokes: [[100,125,150,125]] },
+                    { char: 'b', points: [50,50,50,150,100,150,150,100,150,50,100,50], strokes: [] },
+                    { char: 'c', points: [150,100,100,100,50,100,50,150,100,150,150,150], strokes: [] },
+                    { char: 'd', points: [150,50,150,150,100,150,50,150,50,100,100,100], strokes: [] },
+                    { char: 'e', points: [50,125,100,125,150,125,150,100,100,100,50,100,50,150,100,150,150,150], strokes: [] },
+                    { char: 'f', points: [100,50,100,150,50,100,150,100], strokes: [] },
+                    { char: 'g', points: [100,100,150,100,150,150,100,150,50,150,50,100,100,100], strokes: [[100,150,100,200,150,200]] },
+                    { char: 'h', points: [50,50,50,150,100,150,150,100,150,50], strokes: [] },
+                    { char: 'i', points: [100,50,100,100], strokes: [[100,125,100,150], [90,40,110,40]] },
+                    { char: 'j', points: [150,50,150,100], strokes: [[150,125,150,175,100,175], [140,40,160,40]] },
+                    { char: 'k', points: [50,50,50,150,150,75,50,100,150,150], strokes: [] },
+                    { char: 'l', points: [100,50,100,150], strokes: [] },
+                    { char: 'm', points: [50,150,50,100,75,100,100,150,125,100,150,150,150,100], strokes: [] },
+                    { char: 'n', points: [50,150,50,100,100,150,150,100,150,150], strokes: [] },
+                    { char: 'ñ', points: [50,150,50,100,100,150,150,100,150,150], strokes: [[75,80,100,80]] },
+                    { char: 'o', points: [100,100,150,100,150,150,100,150,50,150,50,100,100,100], strokes: [] },
+                    { char: 'p', points: [50,50,50,200,100,200,150,150,150,100,100,50,50,50], strokes: [] },
+                    { char: 'q', points: [150,50,150,200,100,200,50,150,50,100,100,50,150,50], strokes: [[100,150,100,200,150,200]] },
+                    { char: 'r', points: [50,150,50,100,100,100,150,100], strokes: [] },
+                    { char: 's', points: [150,100,100,100,50,100,50,125,100,125,150,125,150,150,100,150,50,150], strokes: [] },
+                    { char: 't', points: [100,50,100,150,50,100,150,100], strokes: [] },
+                    { char: 'u', points: [50,100,50,150,100,150,150,100,150,150], strokes: [] },
+                    { char: 'v', points: [50,100,100,150,150,100], strokes: [] },
+                    { char: 'w', points: [50,100,75,150,100,100,125,150,150,100], strokes: [] },
+                    { char: 'x', points: [50,100,150,150], strokes: [[150,100,50,150]] },
+                    { char: 'y', points: [50,100,100,150,150,100], strokes: [[100,150,100,200,150,200]] },
+                    { char: 'z', points: [50,100,150,100,50,150,150,150], strokes: [] }
+                ]
+            };
+
+            // Elementos del DOM
+            const guideCanvas = document.getElementById('guideCanvas');
+            const drawingCanvas = document.getElementById('drawingCanvas');
+            const guideCtx = guideCanvas.getContext('2d');
+            const drawingCtx = drawingCanvas.getContext('2d');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const uppercaseBtn = document.getElementById('uppercaseBtn');
+            const lowercaseBtn = document.getElementById('lowercaseBtn');
+            const letterSelector = document.getElementById('letterSelector');
+            const currentLetterDisplay = document.getElementById('currentLetterDisplay');
+            const totalLetters = document.getElementById('totalLetters');
+
+            // Variables de estado
+            let currentCase = 'uppercase';
+            let currentLetterIndex = 0;
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let canvasSize = { width: 0, height: 0 };
+
+            // Inicializar
+            function init() {
+                // Configurar canvas
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                // Mostrar selectores de letras
+                renderLetterSelector();
+                
+                // Mostrar total de letras
+                totalLetters.textContent = letters.uppercase.length;
+                
+                // Cargar primera letra
+                loadLetter(currentLetterIndex);
+                
+                // Event listeners
+                setupCanvasEvents();
+                setupButtonEvents();
+            }
+
+            // Redimensionar canvas
+            function resizeCanvas() {
+                const container = document.querySelector('.tracing-area');
+                canvasSize.width = container.clientWidth;
+                canvasSize.height = container.clientHeight;
+                
+                guideCanvas.width = canvasSize.width;
+                guideCanvas.height = canvasSize.height;
+                drawingCanvas.width = canvasSize.width;
+                drawingCanvas.height = canvasSize.height;
+                
+                drawGuide();
+            }
+
+            // Renderizar selector de letras
+            function renderLetterSelector() {
+                letterSelector.innerHTML = '';
+                const currentLetters = letters[currentCase];
+                
+                currentLetters.forEach((letter, index) => {
+                    const div = document.createElement('div');
+                    div.className = `letter-option ${index === currentLetterIndex ? 'active' : ''}`;
+                    div.textContent = letter.char;
+                    div.addEventListener('click', () => {
+                        currentLetterIndex = index;
+                        loadLetter(currentLetterIndex);
+                        updateActiveLetterOption();
+                    });
+                    letterSelector.appendChild(div);
+                });
+            }
+
+            // Cargar letra
+            function loadLetter(index) {
+                const currentLetters = letters[currentCase];
+                if (index < 0 || index >= currentLetters.length) return;
+                
+                currentLetterIndex = index;
+                currentLetterDisplay.textContent = currentLetters[index].char;
+                
+                clearDrawing();
+                drawGuide();
+                
+                updateButtons();
+                updateActiveLetterOption();
+            }
+
+            // Dibujar guía de puntos
+            function drawGuide() {
+                guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+                
+                const letter = letters[currentCase][currentLetterIndex];
+                const scale = calculateScale();
+                const offsetX = (canvasSize.width - 200 * scale) / 2;
+                const offsetY = (canvasSize.height - 200 * scale) / 2;
+                
+                // Dibujar puntos principales
+                for (let i = 0; i < letter.points.length; i += 2) {
+                    const x = offsetX + letter.points[i] * scale;
+                    const y = offsetY + letter.points[i+1] * scale;
+                    
+                    guideCtx.beginPath();
+                    guideCtx.arc(x, y, 6, 0, Math.PI * 2);
+                    guideCtx.fillStyle = '#ff6b6b';
+                    guideCtx.fill();
+                    
+                    // Conectar puntos con líneas discontinuas
+                    if (i > 0) {
+                        const prevX = offsetX + letter.points[i-2] * scale;
+                        const prevY = offsetY + letter.points[i-1] * scale;
+                        
+                        guideCtx.beginPath();
+                        guideCtx.moveTo(prevX, prevY);
+                        guideCtx.lineTo(x, y);
+                        guideCtx.strokeStyle = '#4d96ff';
+                        guideCtx.setLineDash([5, 5]);
+                        guideCtx.lineWidth = 2;
+                        guideCtx.stroke();
+                        guideCtx.setLineDash([]);
+                    }
+                }
+                
+                // Dibujar trazos adicionales (como la línea en la A)
+                letter.strokes.forEach(stroke => {
+                    if (stroke.length >= 4) {
+                        guideCtx.beginPath();
+                        guideCtx.moveTo(offsetX + stroke[0] * scale, offsetY + stroke[1] * scale);
+                        guideCtx.lineTo(offsetX + stroke[2] * scale, offsetY + stroke[3] * scale);
+                        guideCtx.strokeStyle = '#4d96ff';
+                        guideCtx.setLineDash([5, 5]);
+                        guideCtx.lineWidth = 2;
+                        guideCtx.stroke();
+                        guideCtx.setLineDash([]);
+                    }
+                });
+            }
+
+            // Calcular escala para ajustar la letra al canvas
+            function calculateScale() {
+                return Math.min(canvasSize.width / 220, canvasSize.height / 220);
+            }
+
+            // Limpiar dibujo
+            function clearDrawing() {
+                drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            }
+
+            // Actualizar botones
+            function updateButtons() {
+                const currentLetters = letters[currentCase];
+                prevBtn.disabled = currentLetterIndex === 0;
+                nextBtn.disabled = currentLetterIndex === currentLetters.length - 1;
+            }
+
+            // Actualizar opción de letra activa
+            function updateActiveLetterOption() {
+                const options = document.querySelectorAll('.letter-option');
+                options.forEach((option, index) => {
+                    option.classList.toggle('active', index === currentLetterIndex);
+                });
+            }
+
+            // Configurar eventos del canvas
+            function setupCanvasEvents() {
+                // Eventos para mouse
+                drawingCanvas.addEventListener('mousedown', startDrawing);
+                drawingCanvas.addEventListener('mousemove', draw);
+                drawingCanvas.addEventListener('mouseup', stopDrawing);
+                drawingCanvas.addEventListener('mouseout', stopDrawing);
+                
+                // Eventos para pantalla táctil
+                drawingCanvas.addEventListener('touchstart', handleTouchStart);
+                drawingCanvas.addEventListener('touchmove', handleTouchMove);
+                drawingCanvas.addEventListener('touchend', stopDrawing);
+            }
+
+            // Configurar eventos de botones
+            function setupButtonEvents() {
+                prevBtn.addEventListener('click', () => {
+                    if (currentLetterIndex > 0) {
+                        loadLetter(currentLetterIndex - 1);
+                    }
+                });
+                
+                nextBtn.addEventListener('click', () => {
+                    const currentLetters = letters[currentCase];
+                    if (currentLetterIndex < currentLetters.length - 1) {
+                        loadLetter(currentLetterIndex + 1);
+                    }
+                });
+                
+                clearBtn.addEventListener('click', clearDrawing);
+                
+                uppercaseBtn.addEventListener('click', () => {
+                    if (currentCase !== 'uppercase') {
+                        currentCase = 'uppercase';
+                        currentLetterIndex = 0;
+                        uppercaseBtn.classList.add('active');
+                        lowercaseBtn.classList.remove('active');
+                        renderLetterSelector();
+                        loadLetter(currentLetterIndex);
+                    }
+                });
+                
+                lowercaseBtn.addEventListener('click', () => {
+                    if (currentCase !== 'lowercase') {
+                        currentCase = 'lowercase';
+                        currentLetterIndex = 0;
+                        lowercaseBtn.classList.add('active');
+                        uppercaseBtn.classList.remove('active');
+                        renderLetterSelector();
+                        loadLetter(currentLetterIndex);
+                    }
+                });
+            }
+
+            // Funciones para dibujar
+            function startDrawing(e) {
+                isDrawing = true;
+                const pos = getPosition(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const pos = getPosition(e);
+                
+                drawingCtx.beginPath();
+                drawingCtx.moveTo(lastX, lastY);
+                drawingCtx.lineTo(pos.x, pos.y);
+                drawingCtx.strokeStyle = '#4d96ff';
+                drawingCtx.lineWidth = 8;
+                drawingCtx.lineCap = 'round';
+                drawingCtx.stroke();
+                
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+            }
+
+            // Funciones para pantalla táctil
+            function handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                drawingCanvas.dispatchEvent(mouseEvent);
+            }
+
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                drawingCanvas.dispatchEvent(mouseEvent);
+            }
+
+            // Obtener posición del cursor/touch
+            function getPosition(e) {
+                const rect = drawingCanvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX || e.touches[0].clientX) - rect.left,
+                    y: (e.clientY || e.touches[0].clientY) - rect.top
+                };
+            }
+
+            // Iniciar la aplicación
+            init();
+        });
+    </script>
+</body>
+</html>

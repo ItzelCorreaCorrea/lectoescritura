@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo a Pronunciar</title>
+    <style>
+        /* CSS */
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .word-display {
+            font-size: 4rem;
+            margin: 20px 0;
+            color: #4d96ff;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .letter {
+            display: inline-block;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+
+        .highlight {
+            color: #ff6b6b;
+            transform: scale(1.3);
+            font-weight: bold;
+        }
+
+        .highlight-all {
+            color: #6bff6b;
+            transform: scale(1.2);
+            font-weight: bold;
+        }
+
+        .image-container {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease-out;
+        }
+
+        .image-container.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+        }
+
+        button:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #4d96ff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            .word-display {
+                font-size: 3rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+        .btn {
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            position: relative;
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+        <div class="header-container">
+            <div class="logo" onclick="location.href='index.html'">
+                <div class="logo-text">Aprendiendo con Diversión</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="actividades.html">Actividades</a></li>
+                    <li><a href="recursos.html">Recursos</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Aprendiendo a Pronunciar</h1>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="word-display" id="wordDisplay"></div>
+        
+        <div class="image-container" id="imageContainer">
+            <img id="wordImage" src="" alt="Imagen de la palabra">
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Anterior</button>
+            <button id="playBtn">Reproducir</button>
+            <button id="nextBtn">Siguiente</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Aprendiendo con Diversión | UMSNH</p>
+        <div class="footer-links">
+            <a href="privacidad.html">Política de Privacidad</a>
+            <a href="terminos.html">Términos de Uso</a>
+            <a href="contacto.html">Contacto</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de carga suave
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        const logo = document.querySelector('.logo');
+            if(logo) {
+                logo.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                logo.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        });
+        // JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Datos de palabras con sus imágenes animadas
+            const wordsData = [
+                {
+                    word: "GATO",
+                    image: "img/gato.jpg",
+                    letters: ["G", "A", "T", "O"]
+                },
+                {
+                    word: "CASA",
+                    image: "img/casa.jpg",
+                    letters: ["C", "A", "S", "A"]
+                },
+                {
+                    word: "SOL",
+                    image: "img/sol.jpg",
+                    letters: ["S", "O", "L"]
+                },
+                {
+                    word: "LUNA",
+                    image: "img/luna.jpg",
+                    letters: ["L", "U", "N", "A"]
+                },
+                {
+                    word: "ÁRBOL",
+                    image: "img/arbol.jpg",
+                    letters: ["Á", "R", "B", "O", "L"]
+                },
+                {
+                    word: "PERRO",
+                    image: "img/perro.jpg",
+                    letters: ["P", "E", "R", "R", "O"]
+                },
+                {
+                    word: "FLOR",
+                    image: "img/flor.jpg",
+                    letters: ["F", "L", "O", "R"]
+                },
+                {
+                    word: "MESA",
+                    image: "img/mesa.jpg",
+                    letters: ["M", "E", "S", "A"]
+                },
+                {
+                    word: "PATO",
+                    image: "img/pato.jpg",
+                    letters: ["P", "A", "T", "O"]
+                },
+                {
+                    word: "NUBE",
+                    image: "img/nube.jpg",
+                    letters: ["N", "U", "B", "E"]
+                },
+                {
+                    word: "GUÍA",
+                    image: "img/guía.jpg",
+                    letters: ["G", "U", "Í", "A"]
+                },
+                {
+                    word: "PEZ",
+                    image: "img/pez.jpg",
+                    letters: ["P", "E", "Z"]
+                },
+                {
+                    word: "AJOLOTE",
+                    image: "img/ajolote.jpg",
+                    letters: ["A", "J", "O", "L", "O", "T", "E"]
+                },
+                {
+                    word: "SALAMANDRA",
+                    image: "img/salamandra.jpg",
+                    letters: ["S", "A", "L", "A", "M", "A", "N", "D", "R", "A"]
+                },
+                {
+                    word: "BALLENA",
+                    image: "img/ballena.jpg",
+                    letters: ["B", "A", "L", "L", "E", "N", "A"]
+                },
+                {
+                    word: "TORTUGA",
+                    image: "img/tortuga.jpg",
+                    letters: ["T", "O", "R", "T", "U", "G", "A"]
+                },
+                {
+                    word: "CONEJO",
+                    image: "img/conejo.jpg",
+                    letters: ["C", "O", "N", "E", "J", "O"]
+                },
+                {
+                    word: "ARMADILLO",
+                    image: "img/armadillo.jpg",
+                    letters: ["A", "R", "M", "A", "D", "I", "L", "L", "O"]
+                }
+            ];
+
+            // Elementos del DOM
+            const wordDisplay = document.getElementById('wordDisplay');
+            const wordImage = document.getElementById('wordImage');
+            const imageContainer = document.getElementById('imageContainer');
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressBar = document.getElementById('progressBar');
+
+            // Variables de estado
+            let currentWordIndex = 0;
+            let isPlaying = false;
+            let currentLetterIndex = 0;
+            let speechSynthesis = window.speechSynthesis;
+
+            // Cargar la palabra actual
+            function loadWord(index) {
+                if (index < 0 || index >= wordsData.length) return;
+                
+                currentWordIndex = index;
+                const currentWord = wordsData[currentWordIndex];
+                
+                // Mostrar la palabra completa
+                wordDisplay.innerHTML = '';
+                currentWord.letters.forEach((letter, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'letter';
+                    span.textContent = letter;
+                    span.id = `letter-${i}`;
+                    wordDisplay.appendChild(span);
+                });
+                
+                // Ocultar la imagen al cargar nueva palabra
+                imageContainer.classList.remove('show');
+                wordImage.src = currentWord.image;
+                wordImage.alt = `Imagen de ${currentWord.word}`;
+                
+                // Actualizar progreso
+                progressBar.style.width = `${(currentWordIndex + 1) / wordsData.length * 100}%`;
+                
+                // Actualizar estado de los botones
+                prevBtn.disabled = currentWordIndex === 0;
+                nextBtn.disabled = currentWordIndex === wordsData.length - 1;
+                
+                // Reiniciar el estado de reproducción
+                isPlaying = false;
+                currentLetterIndex = 0;
+                playBtn.textContent = 'Reproducir';
+                
+                // Quitar resaltado de todas las letras
+                document.querySelectorAll('.letter').forEach(letter => {
+                    letter.classList.remove('highlight', 'highlight-all');
+                });
+            }
+
+            // Pronunciar la palabra letra por letra
+            async function playWord() {
+                if (isPlaying) return;
+                
+                isPlaying = true;
+                playBtn.disabled = true;
+                playBtn.textContent = 'Reproduciendo...';
+                const currentWord = wordsData[currentWordIndex];
+                
+                // Asegurarse de que la imagen esté oculta al comenzar
+                imageContainer.classList.remove('show');
+                
+                // Pronunciar cada letra
+                for (let i = 0; i < currentWord.letters.length; i++) {
+                    currentLetterIndex = i;
+                    
+                    // Resaltar la letra actual
+                    document.querySelectorAll('.letter').forEach(letter => {
+                        letter.classList.remove('highlight', 'highlight-all');
+                    });
+                    document.getElementById(`letter-${i}`).classList.add('highlight');
+                    
+                    // Pronunciar la letra
+                    await speakLetter(currentWord.letters[i]);
+                    await new Promise(resolve => setTimeout(resolve, 800)); // Pausa entre letras
+                }
+                
+                // Resaltar todas las letras al pronunciar la palabra completa
+                document.querySelectorAll('.letter').forEach(letter => {
+                    letter.classList.add('highlight-all');
+                });
+                
+                // Pronunciar la palabra completa
+                await speakWord(currentWord.word);
+                
+                // Mostrar la imagen animada con efecto
+                setTimeout(() => {
+                    imageContainer.classList.add('show');
+                }, 300);
+                
+                // Quitar resaltado después de un breve tiempo
+                setTimeout(() => {
+                    document.querySelectorAll('.letter').forEach(letter => {
+                        letter.classList.remove('highlight', 'highlight-all');
+                    });
+                }, 1000);
+                
+                // Restablecer estado
+                isPlaying = false;
+                playBtn.disabled = false;
+                playBtn.textContent = 'Reproducir';
+            }
+
+            // Función para pronunciar una letra
+            function speakLetter(letter) {
+                return new Promise(resolve => {
+                    const utterance = new SpeechSynthesisUtterance(letter);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 0.8;
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                });
+            }
+
+            // Función para pronunciar una palabra
+            function speakWord(word) {
+                return new Promise(resolve => {
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 0.8;
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                });
+            }
+
+            // Event listeners
+            playBtn.addEventListener('click', function() {
+                if (!isPlaying) {
+                    playWord();
+                }
+            });
+
+            prevBtn.addEventListener('click', function() {
+                if (currentWordIndex > 0) {
+                    loadWord(currentWordIndex - 1);
+                }
+            });
+
+            nextBtn.addEventListener('click', function() {
+                if (currentWordIndex < wordsData.length - 1) {
+                    loadWord(currentWordIndex + 1);
+                }
+            });
+
+            // Inicializar con la primera palabra
+            loadWord(0);
+        });
+    </script>
+</body>
+</html>

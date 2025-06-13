@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Actividad de Trazado de Letras</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>Traza la Letra</h1>
+
+    <div class="controls">
+      <label for="case">Tipo:</label>
+      <select id="case">
+        <option value="uppercase">Mayúscula</option>
+        <option value="lowercase">Minúscula</option>
+      </select>
+
+      <label for="letter">Letra:</label>
+      <select id="letter"></select>
+    </div>
+
+    <canvas id="canvas" width="400" height="400"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

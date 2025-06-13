@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordena las Palabras ✨</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f9f7fe;
+            text-align: center;
+            padding: 20px;
+            color: #5a4ae3;
+        }
+        h1 {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #contenedor-juego {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        #contenedor-palabras {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 60px;
+            background: #f1f9ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        header {
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #3a7bd5;
+            transform: translateY(-2px);
+        }
+        #contenedor-oracion {
+            min-height: 80px;
+            border: 2px dashed #a5d8ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #f1f9ff;
+        }
+        .palabra {
+            padding: 10px 15px;
+            background: #ffd166;
+            border-radius: 8px;
+            cursor: grab;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .palabra:hover {
+            background: #ffb347;
+            transform: scale(1.05);
+        }
+        .palabra:active {
+            cursor: grabbing;
+        }
+        #botones {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        button {
+            background: #5a4ae3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #3a2ec1;
+        }
+        #resultado {
+            font-size: 18px;
+            margin: 15px 0;
+            min-height: 25px;
+            font-weight: bold;
+        }
+        #aciertos {
+            font-size: 20px;
+            color: #06d6a0;
+        }
+        .correcto {
+            background: #06d6a0 !important;
+            color: white;
+        }
+        .incorrecto {
+            background: #ef476f !important;
+            color: white;
+        }
+        .nivel-btn {
+            background: #ff9a8b;
+        }
+        .nivel-btn.seleccionado {
+            background: #ff6b6b;
+            transform: scale(1.05);
+        }
+        .separador {
+            width: 100%;
+            height: 10px;
+        }
+
+        footer {
+            position: relative;
+            width: 100%;
+            background-color: #4d96ff;
+            color: white;
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="location.href='index.html'">
+                <div class="logo-text">Aprendiendo con Diversión</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="actividades.html">Actividades</a></li>
+                    <li><a href="recursos.html">Recursos</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div id="contenedor-juego">
+        <h1>Ordena las Palabras ✨</h1>
+        <div id="botones-nivel">
+            <button class="nivel-btn seleccionado" data-nivel="facil">Fácil</button>
+            <button class="nivel-btn" data-nivel="medio">Medio</button>
+            <button class="nivel-btn" data-nivel="dificil">Difícil</button>
+        </div>
+        <div class="separador"></div>
+        <p id="instruccion">Forma una oración con las palabras.</p>
+        <div id="contenedor-palabras"></div>
+        <div id="contenedor-oracion"></div>
+        <div id="botones">
+            <button id="verificar">Verificar</button>
+            <button id="reiniciar">Nueva Oración</button>
+        </div>
+        <p id="resultado"></p>
+        <p id="aciertos">Aciertos: 0</p>
+    </div>
+
+    <footer>
+        <p>© 2025 Aprendiendo con Diversión | UMSNH</p>
+        <div class="footer-links">
+            <a href="privacidad.html">Política de Privacidad</a>
+            <a href="terminos.html">Términos de Uso</a>
+            <a href="contacto.html">Contacto</a>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de carga suave
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        const logo = document.querySelector('.logo');
+            if(logo) {
+                logo.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                logo.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            }
+        });
+        // Banco de oraciones por nivel
+        const oraciones = {
+            facil: [
+                "El sol brilla",
+                "La niña canta",
+                "Mamá cocina",
+                "El perro ladra"
+            ],
+            medio: [
+                "Los niños juegan en el parque",
+                "El gato duerme en la silla",
+                "La abuela lee un libro",
+                "El coche azul es rápido"
+            ],
+            dificil: [
+                "Ayer por la tarde, el pájaro construyó su nido",
+                "Durante el verano, visitamos la playa todos los domingos",
+                "El supermercado cerca de mi casa vende frutas frescas"
+            ]
+        };
+
+        // Variables del juego
+        let oracionActual = "";
+        let palabrasDesordenadas = [];
+        let aciertos = 0;
+        let nivelActual = "facil";
+        const contenedorPalabras = document.getElementById("contenedor-palabras");
+        const contenedorOracion = document.getElementById("contenedor-oracion");
+        const verificarBtn = document.getElementById("verificar");
+        const reiniciarBtn = document.getElementById("reiniciar");
+        const resultado = document.getElementById("resultado");
+        const aciertosDisplay = document.getElementById("aciertos");
+        const botonesNivel = document.querySelectorAll(".nivel-btn");
+        const instruccion = document.getElementById("instruccion");
+        // Sonidos (opcional)
+        const sonidoCorrecto = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+        const sonidoIncorrecto = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3');
+
+        // Iniciar juego
+        function iniciarJuego() {
+            // Seleccionar oración aleatoria según nivel
+            const oracionesNivel = oraciones[nivelActual];
+            oracionActual = oracionesNivel[Math.floor(Math.random() * oracionesNivel.length)];
+            instruccion.textContent = `Forma una oración con las palabras.`;
+            
+            // Desordenar palabras
+            palabrasDesordenadas = oracionActual.split(" ");
+            palabrasDesordenadas.sort(() => Math.random() - 0.5);
+            
+            // Mostrar palabras desordenadas
+            contenedorPalabras.innerHTML = "";
+            palabrasDesordenadas.forEach(palabra => {
+                crearElementoPalabra(palabra, contenedorPalabras);
+            });
+            
+            // Limpiar contenedor de oración
+            contenedorOracion.innerHTML = "";
+            resultado.textContent = "";
+        }
+
+        // Crear elemento palabra (drag & click)
+        function crearElementoPalabra(palabra, contenedor) {
+            const elem = document.createElement("div");
+            elem.className = "palabra";
+            elem.textContent = palabra;
+            elem.draggable = true;
+            
+            // Evento para arrastrar
+            elem.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", palabra);
+                e.dataTransfer.setData("source", contenedor.id);
+            });
+            
+            // Evento para devolver palabra al banco (click)
+            elem.addEventListener("click", () => {
+                if (contenedor.id === "contenedor-oracion") {
+                    contenedor.removeChild(elem);
+                    crearElementoPalabra(palabra, contenedorPalabras);
+                }
+            });
+            
+            contenedor.appendChild(elem);
+            return elem;
+        }
+
+        // Permitir soltar palabras en el contenedor de oración
+        contenedorOracion.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const rect = contenedorOracion.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            
+            // Destacar áreas entre palabras para insertar
+            const palabras = Array.from(contenedorOracion.children);
+            let posicionInsercion = null;
+            
+            palabras.forEach((palabra, index) => {
+                const palabraRect = palabra.getBoundingClientRect();
+                const palabraY = palabraRect.top - rect.top + palabraRect.height / 2;
+                
+                if (y < palabraY) {
+                    posicionInsercion = index;
+                    return;
+                }
+            });
+            
+            if (posicionInsercion === null) posicionInsercion = palabras.length;
+            
+            // Resaltar área de inserción
+            contenedorOracion.querySelectorAll(".highlight-insert").forEach(el => el.remove());
+            if (palabras.length > 0) {
+                const highlight = document.createElement("div");
+                highlight.className = "highlight-insert";
+                highlight.style.height = "4px";
+                highlight.style.background = "#ff6b6b";
+                highlight.style.margin = "2px 0";
+                
+                if (posicionInsercion === 0) {
+                    contenedorOracion.insertBefore(highlight, palabras[0]);
+                } else if (posicionInsercion === palabras.length) {
+                    contenedorOracion.appendChild(highlight);
+                } else {
+                    contenedorOracion.insertBefore(highlight, palabras[posicionInsercion]);
+                }
+            }
+        });
+
+        contenedorOracion.addEventListener("dragleave", () => {
+            contenedorOracion.querySelectorAll(".highlight-insert").forEach(el => el.remove());
+        });
+
+        contenedorOracion.addEventListener("drop", (e) => {
+            e.preventDefault();
+            contenedorOracion.querySelectorAll(".highlight-insert").forEach(el => el.remove());
+            
+            const palabra = e.dataTransfer.getData("text/plain");
+            const source = e.dataTransfer.getData("source");
+            
+            if (source === "contenedor-palabras") {
+                const rect = contenedorOracion.getBoundingClientRect();
+                const y = e.clientY - rect.top;
+                const palabras = Array.from(contenedorOracion.children);
+                let posicionInsercion = null;
+                
+                palabras.forEach((palabraElem, index) => {
+                    const palabraRect = palabraElem.getBoundingClientRect();
+                    const palabraY = palabraRect.top - rect.top + palabraRect.height / 2;
+                    
+                    if (y < palabraY && !palabraElem.classList.contains("highlight-insert")) {
+                        posicionInsercion = index;
+                        return;
+                    }
+                });
+                
+                if (posicionInsercion === null) posicionInsercion = palabras.length;
+                
+                // Eliminar del origen
+                const origen = document.getElementById(source);
+                Array.from(origen.children).forEach(el => {
+                    if (el.textContent === palabra) {
+                        origen.removeChild(el);
+                    }
+                });
+                
+                // Insertar en posición correcta
+                const elem = crearElementoPalabra(palabra, contenedorOracion);
+                if (posicionInsercion < palabras.length) {
+                    contenedorOracion.insertBefore(elem, palabras[posicionInsercion]);
+                }
+            }
+        });
+
+        // Verificar oración
+        verificarBtn.addEventListener("click", () => {
+            const oracionUsuario = Array.from(contenedorOracion.children)
+                .filter(el => !el.classList.contains("highlight-insert"))
+                .map(el => el.textContent).join(" ");
+            
+            if (oracionUsuario === oracionActual) {
+                resultado.textContent = "¡Correcto! 😊🎉";
+                resultado.style.color = "#06d6a0";
+                Array.from(contenedorOracion.children).forEach(palabra => {
+                    if (!palabra.classList.contains("highlight-insert")) {
+                        palabra.classList.add("correcto");
+                    }
+                });
+                aciertos++;
+                aciertosDisplay.textContent = `Aciertos: ${aciertos}`;
+                sonidoCorrecto.play();
+                
+                setTimeout(() => {
+                    iniciarJuego();
+                }, 1500);
+            } else {
+                resultado.textContent = "¡Ups! Intenta de nuevo 💡";
+                resultado.style.color = "#ef476f";
+                Array.from(contenedorOracion.children).forEach(palabra => {
+                    if (!palabra.classList.contains("highlight-insert")) {
+                        palabra.classList.add("incorrecto");
+                    }
+                });
+                sonidoIncorrecto.play();
+                setTimeout(() => {
+                    Array.from(contenedorOracion.children).forEach(palabra => {
+                        palabra.classList.remove("incorrecto");
+                    });
+                }, 1000);
+            }
+        });
+
+        // Reiniciar juego
+        reiniciarBtn.addEventListener("click", iniciarJuego);
+
+        // Cambiar nivel
+        botonesNivel.forEach(boton => {
+            boton.addEventListener("click", () => {
+                botonesNivel.forEach(b => b.classList.remove("seleccionado"));
+                boton.classList.add("seleccionado");
+                nivelActual = boton.dataset.nivel;
+                iniciarJuego();
+            });
+        });
+
+        // Iniciar al cargar la página
+        window.addEventListener("load", iniciarJuego);
+    </script>
+</body>
+</html>
